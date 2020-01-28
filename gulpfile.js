@@ -3,8 +3,7 @@
 const
 
   dir = {
-    src         : 'src/',
-    dist        : 'dist/commenter/',
+    src         : './',
     plugin      : '../../plugins/commenter/'
   },
   gulp          = require('gulp'),
@@ -23,35 +22,36 @@ const
 var browsersync = false;
 
 const php = {
-  src           : dir.src + 'php/**/*.php',
-  dist          : dir.dist,
+  src           : dir.src + '**/*.php',
   plugin        : dir.plugin
 };
 
 const img = {
-  src           : dir.src + 'img/**/*',
-  dist          : dir.dist + 'assets/img/',
+  src           : dir.src + 'assets/img/**/*',
+  dest          : dir.src + 'assets/img/',
   plugin        : dir.plugin + 'assets/img/'
 };
 
 const admin_js = {
-  src         : dir.src + 'js/admin/**/*',
-  dist        : dir.dist + 'assets/js/admin/',
+  src         : dir.src + 'assets/js/admin/**/*.js',
+  min         : dir.src + 'assets/js/admin/**/*.min.js',
+  dest        : dir.src + 'assets/js/admin/',
   plugin      : dir.plugin + 'assets/js/admin/',
   filename    : 'commenter-admin.js'
 };
 
 const public_js = {
-  src         : dir.src + 'js/public/**/*',
-  dist        : dir.dist + 'assets/js/public/',
+  src         : dir.src + 'assets/js/public/**/*.js',
+  min         : dir.src + 'assets/js/public/**/*.min.js',
+  dest        : dir.src + 'assets/js/public/',
   plugin      : dir.plugin + 'assets/js/public/',
   filename    : 'commenter-public.js'
 };
 
 var admin_css = {
-  src         : dir.src + 'css/admin/commenter-admin.css',
-  watch       : dir.src + 'css/admin/**/*',
-  dist        : dir.dist + 'assets/css/admin/',
+  src         : dir.src + 'assets/css/admin/commenter-admin.css',
+  watch       : dir.src + 'assets/css/admin/**/*.css',
+  dest        : dir.src + 'assets/css/admin/',
   plugin      : dir.plugin + 'assets/css/admin/',
   processors: [
     require('postcss-assets')({
@@ -63,9 +63,9 @@ var admin_css = {
 };
 
 var public_css = {
-  src         : dir.src + 'css/public/commenter-public.css',
-  watch       : dir.src + 'css/public/**/*',
-  dist        : dir.dist + 'assets/css/public/',
+  src         : dir.src + 'assets/css/public/commenter-public.css',
+  watch       : dir.src + 'assets/css/public/**/*.css',
+  dest        : dir.src + 'assets/css/public/',
   plugin      : dir.plugin + 'assets/css/public/',
   processors: [
     require('postcss-assets')({
@@ -78,14 +78,12 @@ var public_css = {
 
 gulp.task('images', () => {
   return gulp.src(img.src)
-    .pipe(gulp.dest(img.dist))
     .pipe(gulp.dest(img.plugin))
     .pipe(imagemin());
 });
 
 gulp.task('admin-css', gulp.series( 'images', () => {
   return gulp.src(admin_css.src)
-    .pipe(gulp.dest(admin_css.dist))
     .pipe(gulp.dest(admin_css.plugin))
     .pipe(postcss(admin_css.processors))
     .pipe(rename({ suffix: '.min' }))
@@ -97,13 +95,11 @@ gulp.task('admin-js', () => {
 
   return gulp.src(admin_js.src)
     .pipe(deporder())
-    .pipe(gulp.dest(admin_js.dist))
     .pipe(gulp.dest(admin_js.plugin))
     .pipe(concat(admin_js.filename))
     .pipe(stripdebug())
     .pipe(uglify())
     .pipe(rename({ suffix: '.min' }))
-    .pipe(gulp.dest(admin_js.dist))
     .pipe(gulp.dest(admin_js.plugin))
     .pipe(browsersync ? browsersync.reload({ stream: true }) : gutil.noop());
 
@@ -111,19 +107,15 @@ gulp.task('admin-js', () => {
 
 gulp.task('public-css', gulp.series('images', () => {
   return gulp.src(public_css.src)
-    .pipe(gulp.dest(public_css.dist))
     .pipe(postcss(public_css.processors))
-    .pipe(gulp.dest(public_css.dist))
     .pipe(gulp.dest(public_css.plugin))
     .pipe(browsersync ? browsersync.reload({ stream: true }) : gutil.noop());
 } ) );
 
 gulp.task('public-js', () => {
 
-  return gulp.src(public_js.src)
-    .pipe(gulp.dest(public_js.dist))
+  return gulp.src([public_js.src, '!' + public_js.min])
     .pipe(concat(public_js.filename))
-    .pipe(gulp.dest(public_js.dist))
     .pipe(gulp.dest(public_js.plugin))
     .pipe(browsersync ? browsersync.reload({ stream: true }) : gutil.noop());
 
@@ -131,10 +123,9 @@ gulp.task('public-js', () => {
 
 gulp.task('public-min-css', gulp.series('images', () => {
   return gulp.src(public_css.src)
-    .pipe(gulp.dest(public_css.dist))
     .pipe(postcss(public_css.processors))
     .pipe(rename({ suffix: '.min' }))
-    .pipe(gulp.dest(public_css.dist))
+    .pipe(gulp.dest(public_css.dest))
     .pipe(gulp.dest(public_css.plugin))
     .pipe(browsersync ? browsersync.reload({ stream: true }) : gutil.noop());
 } ) );
@@ -142,12 +133,11 @@ gulp.task('public-min-css', gulp.series('images', () => {
 gulp.task('public-min-js', () => {
 
   return gulp.src(public_js.src)
-    .pipe(gulp.dest(public_js.dist))
     .pipe(concat(public_js.filename))
     .pipe(stripdebug())
     .pipe(uglify())
     .pipe(rename({ suffix: '.min' }))
-    .pipe(gulp.dest(public_js.dist))
+    .pipe(gulp.dest(public_js.dest))
     .pipe(gulp.dest(public_js.plugin))
     .pipe(browsersync ? browsersync.reload({ stream: true }) : gutil.noop());
 
@@ -155,8 +145,7 @@ gulp.task('public-min-js', () => {
 
 gulp.task('php', () => {
   return gulp.src(php.src)
-    .pipe(newer(php.dist))
-    .pipe(gulp.dest(php.dist))
+    .pipe(newer(php.src))
     .pipe(gulp.dest(php.plugin));
 });
 
@@ -191,11 +180,11 @@ gulp.task( 'watch', function() {
 
   gulp.watch( public_css.watch, gulp.series( 'public-css' ) );
 
-  gulp.watch( public_js.src, gulp.series( 'public-js' ) );
+  gulp.watch( [public_js.src, '!' + public_js.min], gulp.series( 'public-js' ) );
 
   gulp.watch( public_css.watch, gulp.series( 'public-min-css' ) );
 
-  gulp.watch( public_js.src, gulp.series( 'public-min-js' ) );
+  gulp.watch( [public_js.src, '!' + public_js.min], gulp.series( 'public-min-js' ) );
 
 
 } );
