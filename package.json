@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Commenter is a slightly more advanced commenting system for WordPress blogs.",
   "main": "gulpfile.js",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "lodash.template": "^4.5.0"
+  },
   "devDependencies": {
     "autoprefixer": "^9.6.0",
     "browser-sync": "^2.26.7",
