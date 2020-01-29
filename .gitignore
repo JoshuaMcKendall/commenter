@@ -1,2 +1,34 @@
-node_modules/
+# Editors
+project.xml
+project.properties
+/nbproject/private/
+.buildpath
+.project
+.settings*
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+
+# Gulp
+/node_modules/
+none
+
+# Minified JS
+/assets/js/admin/*.min.js
+/assets/js/public/*.min.js
+
+# OS X metadata
 .DS_Store
+
+# Windows junk
+Thumbs.db
+
+# Composer
+/vendor/
+contributors.md
+
+# Packages
+/packages/*
+!/packages/README.md
